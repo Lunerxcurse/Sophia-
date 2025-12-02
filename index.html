@@ -1,0 +1,221 @@
+<!doctype html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1,viewport-fit=cover" name="viewport"/>
+  <title>Google Classroom</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <meta name="theme-color" content="#0f172a" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            "background-light": "#f3f4f6",
+            "background-dark": "#0f172a",
+          },
+          fontFamily: {
+            display: ["Roboto", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "0.5rem",
+          },
+        },
+      },
+    };
+  </script>
+  <script type="importmap">
+  {
+    "imports": {
+      "nanoid": "https://esm.sh/nanoid@4.0.0"
+    }
+  }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body class="bg-background-dark text-gray-200 font-display">
+  <div class="flex h-screen">
+    <aside class="w-64 bg-black flex flex-col p-4 border-r border-slate-700/50">
+      <button class="flex items-center justify-center gap-2 w-full bg-primary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200">
+        <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+        New Chat
+      </button>
+
+      <nav class="mt-6 space-y-2 flex-grow overflow-y-auto">
+        <a id="open-image-generator" class="flex items-center gap-3 py-2 px-3 rounded-lg text-gray-300 hover:bg-slate-700 transition-colors duration-200 cursor-pointer" href="javascript:void(0);">
+          <span class="material-symbols-outlined">image</span>
+          AI Image Generator
+        </a>
+
+        <ul id="chat-list" class="mt-4 space-y-1 text-sm text-gray-300">
+          <!-- Chat history items injected here -->
+        </ul>
+
+        <div class="mt-6 text-center text-sm text-gray-400 p-2">
+          <p>No chat history yet. Start a conversation to see your chats here.</p>
+        </div>
+      </nav>
+
+      <div class="border-t border-slate-700/50 pt-4 mt-2 space-y-2">
+        <div id="selected-files-display" class="text-xs text-gray-400 px-3 break-words"></div>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col p-6">
+      <header class="flex items-center justify-between mb-4 px-2">
+        <button id="menu-btn" class="p-2 rounded-md text-gray-300 hover:text-white hover:bg-slate-700/40 focus:outline-none" title="Open menu" aria-label="Open menu">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-lg">
+            U
+          </div>
+        </div>
+      </header>
+
+      <!-- Image generator view (hidden by default) -->
+      <section id="image-generator-view" class="hidden flex-1 flex flex-col gap-4">
+        <div class="max-w-3xl w-full mx-auto bg-slate-800/60 rounded-xl p-6 border border-slate-700/50">
+          <h2 class="text-lg font-semibold text-white mb-3">AI Image Generator</h2>
+          <form id="generate-form" class="space-y-3">
+            <label class="block text-sm text-gray-300">Prompt</label>
+            <input id="prompt-input" type="text" placeholder="Describe the image you want..." class="w-full p-3 rounded-lg bg-slate-900/40 border border-slate-700 text-gray-100" />
+            <div class="flex gap-2">
+              <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg">Generate</button>
+              <button id="back-to-chat-btn" type="button" class="px-4 py-2 bg-slate-700 text-gray-200 rounded-lg">Back to Chat</button>
+            </div>
+          </form>
+
+          <div id="error-message" class="mt-4 text-sm text-yellow-300"></div>
+          <div id="image-area" class="mt-4 bg-black/60 rounded-lg p-4">
+            <img id="ai-image" alt="" style="display:none; width:100%; border-radius:8px;"/>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings view (hidden by default) -->
+      <section id="settings-view" class="hidden flex-1 flex flex-col gap-4">
+        <div class="max-w-3xl w-full mx-auto bg-slate-800/60 rounded-xl p-6 border border-slate-700/50">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Settings</h2>
+            <button id="back-from-settings" class="px-3 py-1.5 bg-slate-700 text-gray-200 rounded-lg">Back</button>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-slate-900/40 rounded-lg border border-slate-700/40">
+              <div>
+                <div class="text-sm font-medium text-gray-200">Dark Mode</div>
+                <div class="text-xs text-gray-400">Toggle interface theme</div>
+              </div>
+              <button id="toggle-darkmode" class="px-3 py-1.5 bg-slate-700 text-gray-200 rounded-lg">Toggle</button>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-slate-900/40 rounded-lg border border-slate-700/40">
+              <div>
+                <div class="text-sm font-medium text-gray-200">Model Key (masked)</div>
+                <div class="text-xs text-gray-400">Your Gemini API key (stored in localStorage)</div>
+              </div>
+              <button id="reveal-key" class="px-3 py-1.5 bg-slate-700 text-gray-200 rounded-lg">Reveal</button>
+            </div>
+
+            <div class="p-3 bg-slate-900/40 rounded-lg border border-slate-700/40">
+              <div class="text-sm font-medium text-gray-200 mb-2">Advanced</div>
+              <div class="flex gap-2">
+                <button id="clear-storage" class="px-3 py-1.5 bg-red-600 text-white rounded-lg">Clear Local Storage</button>
+                <button id="export-chats" class="px-3 py-1.5 bg-primary text-white rounded-lg">Export Chats</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat view (kept for toggle) -->
+      <section id="chat-view" class="flex-1 flex flex-col items-stretch mb-4">
+        <div id="chat-box" role="log" aria-live="polite" class="flex-1 bg-black rounded-xl p-4 overflow-y-auto border border-slate-700/50 space-y-3">
+          <!-- Messages injected by app.js -->
+        </div>
+      </section>
+
+      <div class="w-full max-w-3xl mx-auto">
+        <div id="composer-row" class="relative bg-slate-800/60 rounded-xl p-2 shadow-sm border border-slate-700/50 flex flex-col">
+          <div class="relative flex items-center">
+            <div id="user-input"
+                 contenteditable="true"
+                 placeholder="Message Nova AI..."
+                 class="w-full bg-transparent border-0 pl-12 pr-28 py-3 resize-none focus:outline-none focus:ring-0 text-gray-200 placeholder-gray-400 overflow-y-auto"
+                 style="min-height: 24px;"></div>
+
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <button id="attach-btn" class="p-1 text-gray-400 hover:text-primary transition-colors" type="button" title="Attach files">
+                <span class="material-symbols-outlined">attach_file</span>
+              </button>
+              <!-- Removed image and more buttons per UI update -->
+            </div>
+
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <button id="mic-btn" class="p-1.5 rounded-full text-gray-400 hover:text-primary hover:bg-slate-700 transition-colors" type="button" title="Record voice">
+                <span class="material-symbols-outlined">mic</span>
+              </button>
+              <button id="send-btn" class="ml-1 px-3 py-1.5 rounded-full bg-primary text-white hover:bg-blue-600 transition-colors flex items-center gap-1" type="button" aria-label="Send">
+                <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- History side panel (kept in DOM but history button removed) -->
+  <div id="history-panel" class="fixed inset-y-0 right-0 w-80 bg-slate-900/95 border-l border-slate-700/70 shadow-xl hidden flex-col z-40">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700/70">
+      <h2 class="text-sm font-semibold text-gray-200">Chat History</h2>
+      <div class="flex gap-2">
+        <button id="clear-history-btn" class="px-2 py-1 text-xs rounded bg-slate-800 text-gray-300 hover:bg-slate-700" type="button">
+          Clear All
+        </button>
+        <button id="close-history-btn" class="px-2 py-1 text-xs rounded bg-slate-800 text-gray-300 hover:bg-slate-700" type="button">
+          Close
+        </button>
+      </div>
+    </div>
+    <ul id="chat-list-panel" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm text-gray-200">
+      <!-- (Note: current JS populates the sidebar chat-list, not this panel list) -->
+    </ul>
+  </div>
+
+  <footer id="meta" class="fixed bottom-2 right-4 text-xs text-gray-500">
+    <div></div>
+    <div class="mt-1 text-right text-xxs text-gray-400">Beta Test — anonymous chat logs & usage data may be collected to improve the system.</div>
+  </footer>
+
+  <!-- sidebar overlay for mobile -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
+
+  <script type="module">
+    import * as Tone from "https://esm.sh/tone";
+    import * as THREE from "https://esm.sh/three";
+    window.Tone = Tone;
+    window.THREE = THREE;
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
+

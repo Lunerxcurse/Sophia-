@@ -1,0 +1,307 @@
+:root{
+  --bg:#0b0d0f;       /* darker neutral background */
+  --panel:#0f1112;    /* slightly lighter panel */
+  --muted:#9aa0a6;    /* muted gray text */
+  --accent:#3b82f6;   /* keep an accent for buttons */
+  --card:#0d1113;
+  --me:#2f3940;       /* user bubble darker gray */
+  --bot:#111418;      /* bot bubble near black */
+  --accent-2:#bfcbd6;
+  --glass: rgba(255,255,255,0.03);
+  --shadow: 0 8px 30px rgba(2,6,23,0.7);
+  --radius:12px;
+  --glass-border: rgba(255,255,255,0.03);
+}
+
+/* changed site background variables to pure black */
+:root{
+  --bg:#000000;
+  --panel:#000000;
+}
+
+*{box-sizing:border-box}
+
+/* Simplified body to let Tailwind control layout/colors */
+html, body{
+  margin:0;
+  height:100%;
+  background:#000000; /* ensure full-page background is pure black */
+  color:#e5e7eb;
+}
+
+/* Ensure the left sidebar sticks to the viewport and is scrollable */
+aside {
+  /* changed from sticky to fixed so the sidebar is a persistent UI panel */
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 16rem; /* matches .w-64 from Tailwind (64 * 0.25rem = 16rem) */
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 70; /* increased so sidebar appears above the composer/chat bar */
+  padding-bottom: 48px; /* give some breathing room for content near bottom */
+  background: #000000; /* make sidebar background pure black */
+}
+
+/* Make main content sit to the right of the fixed sidebar */
+main {
+  margin-left: 16rem; /* push main content to the right of fixed sidebar */
+  background: #000000; /* ensure main background is pure black */
+}
+
+/* Make the sidebar nav/chat list area scrollable and sized to the viewport */
+aside nav {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 160px); /* reserve space for header, controls and footer area in sidebar */
+  overflow-y: auto;
+}
+
+/* Ensure the composer row sticks to bottom and not cover chat contents */
+#composer-row {
+  /* changed to fixed so composer is always visible at bottom of content */
+  position: fixed;
+  bottom: 12px; /* small gap from bottom */
+  right: 24px;
+  left: calc(16rem + 24px); /* stay aligned with main area, account for sidebar width + gap */
+  z-index: 50;
+  width: auto;
+  max-width: calc(100% - (16rem + 48px));
+  box-shadow: var(--shadow);
+  background: rgba(11,17,24,0.6);
+}
+
+/* Reserve space at bottom of the main chat column so content isn't hidden behind the composer */
+main .flex-1 {
+  padding-bottom: 160px; /* should be >= composer height to ensure messages are visible when scrolled */
+}
+
+/* Chat message styling reused inside the new layout */
+#chat-box{
+  display:flex;
+  flex-direction:column;
+  /* position the chat as a main content panel that fills the area between the fixed sidebar and the composer */
+  position: fixed;
+  left: calc(16rem + 24px); /* align with main content after the fixed sidebar + gap */
+  right: 24px; /* leave room on the right for breathing / history panels */
+  top: 24px; /* under the header area */
+  bottom: 140px; /* keep above the composer (should match composer + safe gap) */
+  overflow-y: auto;
+  padding: 20px 18px 20px 18px; /* no need for huge bottom padding since composer sits outside the flow */
+  /* ensure chat can grow naturally */
+  max-height: none;
+}
+
+/* Slight visual adjustments for sticky elements */
+aside::-webkit-scrollbar, #chat-box::-webkit-scrollbar {
+  width: 8px;
+}
+aside::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+}
+
+.message{
+  max-width:86%;
+  padding:12px 14px;
+  border-radius:12px;
+  line-height:1.35;
+  font-size:15px;
+  box-shadow:0 4px 12px rgba(2,6,23,0.45);
+}
+.message.user{
+  align-self:flex-end;
+  background: linear-gradient(180deg, #22272a, #1a1d1f);
+  color:#f8fafb;
+  border-bottom-right-radius:8px;
+}
+.message.bot{
+  align-self:flex-start;
+  background: linear-gradient(180deg, #0f1315, #131617);
+  color:#e6eef3;
+  border-bottom-left-radius:8px;
+}
+.message.status{
+  opacity:0.95;
+  font-style:italic;
+  color:var(--muted);
+  background:transparent;
+  padding:8px;
+}
+
+.timestamp{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+}
+
+/* Buttons used by JS features */
+.copy-code-btn,
+.download-btn,
+.rewrite-btn{
+  margin-left:8px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:none;
+  background:#0b1620;
+  color:#dff7ff;
+  font-size:13px;
+  cursor:pointer;
+}
+
+/* New: clearer styling for like/dislike/copy buttons and active state */
+.copy-code-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background: rgba(11,22,32,0.6);
+  border: 1px solid rgba(255,255,255,0.03);
+  padding:6px 10px;
+  color: #dff7ff;
+  border-radius:8px;
+  transition: background-color 160ms, transform 120ms;
+  cursor: pointer;
+}
+.copy-code-btn:hover { background: rgba(59,130,246,0.08); transform: translateY(-1px); }
+
+.like-btn, .dislike-btn {
+  min-width:56px;
+  justify-content:center;
+}
+
+/* Active state uses the primary color (kept in JS via classes) but add a fallback style */
+.like-btn.bg-primary, .dislike-btn.bg-primary, .copy-code-btn.active {
+  background: var(--accent, #3b82f6);
+  color: white;
+  border-color: rgba(59,130,246,0.9);
+}
+
+/* small size adjustments for mobile/touch friendliness */
+.copy-code-btn, .like-btn, .dislike-btn {
+  padding:8px 10px;
+  font-size:13px;
+  min-height:36px;
+  touch-action: manipulation;
+}
+
+/* ensure spacing between actions in messages */
+.message .mt-2 { gap:8px; }
+
+/* ensure spacing for action row placed under timestamp */
+.message .action-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.generated-image-container img{
+  max-width:100%;
+  height:auto;
+  border-radius:8px;
+  margin-top:8px;
+  display:block;
+}
+.generated-music-container{
+  margin-top:8px;
+}
+
+.enhancement-placeholder{
+  font-style:italic;
+  color:var(--accent-2);
+}
+
+/* Scrollbars for chat area */
+#chat-box::-webkit-scrollbar {width:8px}
+#chat-box::-webkit-scrollbar-thumb {
+  background:rgba(255,255,255,0.08);
+  border-radius:8px;
+}
+#chat-box::-webkit-scrollbar-track {background:transparent}
+
+/* Tools dropdown styling */
+.tools-dropdown {
+  position: absolute;
+  z-index: 60;
+  background: rgba(11,17,24,0.95);
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 8px;
+  border-radius: 10px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+  transform-origin: bottom left;
+}
+.tools-dropdown.hidden { display: none; }
+.tool-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  margin: 4px 0;
+  background: transparent;
+  border: none;
+  color: #dbeefc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.tool-option:hover {
+  background: rgba(59,130,246,0.08);
+  color: #fff;
+}
+#tools-selected-label {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #9aa4b2;
+  text-align: left;
+}
+
+/* Responsive: hide sidebar by default on small screens and provide slide-in when active */
+@media (max-width: 768px) {
+  aside {
+    transform: translateX(-100%);
+    transition: transform 240ms ease;
+    will-change: transform;
+    z-index: 70; /* ensure it stays above composer on mobile */
+    background: #000000; /* ensure mobile sidebar also black */
+  }
+
+  main {
+    margin-left: 0; /* main uses full width on mobile */
+    background: #000000;
+  }
+
+  /* adjust fixed chat/composer alignment on mobile */
+  #composer-row {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
+
+  #chat-box {
+    left: 16px;
+    right: 16px;
+    top: 72px;
+  }
+
+  /* when sidebar-open class applied to html/body, slide the sidebar in and show overlay */
+  .sidebar-open aside {
+    transform: translateX(0);
+  }
+  .sidebar-open #sidebar-overlay {
+    display: block;
+  }
+  #sidebar-overlay {
+    transition: opacity 200ms ease;
+    z-index: 68; /* overlay sits above most UI but below the aside if needed */
+  }
+}
+
+/* Hide the small footer/meta text under the chat/composer area */
+#meta {
+  display: none;
+}
+
